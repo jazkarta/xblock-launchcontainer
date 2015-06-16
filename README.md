@@ -29,6 +29,10 @@ and
 ```
 ["launchcontainer"] to the list of advanced modules
 ```
+* Return to the Course Outline
+* Create a Section, Sub-section and Unit, if you haven’t already
+* In the “Add New Component” interface, you should now see an “Advanced” button
+* Click “Advanced” and choose “launchcontainer”
 
 
 
