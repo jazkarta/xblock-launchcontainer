@@ -10,11 +10,11 @@ or add to your requires.txt
 -e git+https://github.com/jazkarta/xblock-launchcontainer.git@master:egg=launchcontainer
 ```
 
-Update your `lms.env.json` to add:
+Update your `lms.env.json` and `cms.env.json` to add:
 ```
 "ADDL_INSTALLED_APPS" : ["launchcontainer"]
 ```
-and
+and 
 ```
 "FEATURES": {
     "ALLOW_ALL_ADVANCED_COMPONENTS": true
