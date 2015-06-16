@@ -4,12 +4,16 @@
 """
 
 import pkg_resources
+import logging
 
-from django.template import Template
+from django.template import Context, Template
 
 from xblock.core import XBlock
 from xblock.fields import Scope, String
 from xblock.fragment import Fragment
+
+
+log = logging.getLogger(__name__)
 
 
 class LaunchContainerXBlock(XBlock):
@@ -30,39 +34,19 @@ class LaunchContainerXBlock(XBlock):
              "Appsembler API"),
     )
 
-    def load_resource(resource_path):  # pragma: NO COVER
-        """
-        Gets the content of a resource
-        """
-        resource_content = pkg_resources.resource_string(__name__, resource_path)
-        return unicode(resource_content)
-
-    def render_template(template_path, context=None):  # pragma: NO COVER
-         """
-        Evaluate a template by resource path, applying the provided context.
-        """
-        if context is None:
-            context = {}
-
-       template_str = load_resource(template_path)
-       template = Template(template_str)
-       return template.render(Context(context))
-
     def student_view(self, context=None):
         """
         The primary view of the LaunchContainerXBlock, shown to students
         when viewing courses.
         """
         context = {
-            "project" : self.project
-        } 
+            'project': self.project,
+        }
         frag = Fragment()
-        fragment.add_content(
-            render_template('static/html/launchcontainer.html', context=context)
+        frag.add_content(
+            render_template('static/html/launchcontainer.html', context)
         )
-        # html = self.resource_string("static/html/launchcontainer.html")
-        # frag = Fragment(html.format(self=self))
-        frag.add_javascript(self.resource_string("static/js/src/launchcontainer.js"))
+        frag.add_javascript(load_resource("static/js/src/launchcontainer.js"))
         frag.initialize_js('LaunchContainerXBlock')
         return frag
 
@@ -70,7 +54,6 @@ class LaunchContainerXBlock(XBlock):
         """
         Return fragment for editing block in studio.
         """
-        import pdb;pdb.set_trace()
         try:
             cls = type(self)
 
@@ -80,10 +63,10 @@ class LaunchContainerXBlock(XBlock):
                 """
                 return data if data is not None else ''
            
-             edit_fields = (
-                (field, none_to_empty(getattr(self, field.name)), validator)
-                for field, validator in (
-                    (cls.projecte, 'string'),
+            edit_fields = (
+               (field, none_to_empty(getattr(self, field.name)), validator)
+               for field, validator in (
+                   (cls.project, 'string'), )
             )
 
             context = {
@@ -96,7 +79,40 @@ class LaunchContainerXBlock(XBlock):
                     context
                 )
             )
+            fragment.add_javascript(load_resource("static/js/src/launchcontainer_edit.js"))
+            fragment.initialize_js('LaunchContainerEditBlock')
+
             return fragment
         except:  # pragma: NO COVER
             log.error("Don't swallow my exceptions", exc_info=True)
             raise
+
+    @XBlock.json_handler
+    def studio_submit(self, submissions, suffix=''):
+        log.info(u'Received submissions: {}'.format(submissions))
+
+        self.project = submissions['project']
+
+        return {
+            'result': 'success',
+        }
+
+
+def load_resource(resource_path):  # pragma: NO COVER
+     """
+     Gets the content of a resource
+     """
+     resource_content = pkg_resources.resource_string(__name__, resource_path)
+     return unicode(resource_content)
+
+
+def render_template(template_path, context=None):  # pragma: NO COVER
+    """
+    Evaluate a template by resource path, applying the provided context.
+    """
+    if context is None:
+        context = {}
+
+    template_str = load_resource(template_path)
+    template = Template(template_str)
+    return template.render(Context(context))
