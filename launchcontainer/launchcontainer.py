@@ -29,7 +29,8 @@ class LaunchContainerXBlock(XBlock):
     # TO-DO: delete count, and define your own fields.
     project = String(
         display_name='Project name',
-        default=u'', scope=Scope.content,
+        default=u'(EDIT THIS COMPONENT TO SET PROJECT NAME)', 
+        scope=Scope.content,
         help=(u"The name of the container's Project as defined for the "
              "Appsembler API"),
     )
