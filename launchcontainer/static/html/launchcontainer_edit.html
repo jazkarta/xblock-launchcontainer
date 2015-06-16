@@ -1,9 +1,10 @@
 {% load i18n %}
+<div class="wrapper-comp-settings is-active editor-with-buttons" id="settings-tab">
+  <div class="ui-state-error" id="error-message"></div>
 
-<div id="launch-container-edit">
   <ul class="list-input settings-list">
     {% for field, value, validator in fields %}
-    <li class="field comp-setting-entry metadata_entry">
+    <li class="field comp-setting-entry metadata_entry is-set">
       <div class="wrapper-comp-setting">
         <label class="label setting-label" 
           for="{{ field.name }}_input">{{ field.display_name }}</label>
@@ -14,5 +15,15 @@
       <span class="tip setting-help">{{ field.help }}</span>
     </li>
     {% endfor %}
+  </ul>
+</div>
+<div class="xblock-actions">
+  <ul>
+    <li class="action-item">
+      <a href="#" class="button action-primary save-button">Save</a>
+    </li>
+    <li class="action-item">
+      <a href="#" class="button cancel-button">Cancel</a>
+    </li>
   </ul>
 </div>

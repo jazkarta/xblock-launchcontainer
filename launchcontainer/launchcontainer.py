@@ -89,15 +89,17 @@ class LaunchContainerXBlock(XBlock):
             raise
 
     @XBlock.json_handler
-    def studio_submit(self, submissions, suffix=''):
-        log.info(u'Received submissions: {}'.format(submissions))
-
-        self.project = submissions['project']
-
-        return {
-            'result': 'success',
-        }
-
+    def studio_submit(self, data, suffix=''):
+        log.info(u'Received data: {}'.format(data))
+        try:
+            self.project = data['project']
+            return {
+                'result': 'success',
+            }
+        except Exception as e:
+            return {
+                'result': 'Error saving data to Launch Container:{0}'.format(str(e))
+            }
 
 def load_resource(resource_path):  # pragma: NO COVER
      """

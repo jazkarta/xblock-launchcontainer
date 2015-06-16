@@ -21,7 +21,7 @@ def package_data(pkg, roots):
 
 
 setup(
-    name='launchcontainer-xblock',
+    name='xblock-launchcontainer',
     version='0.1',
     description='launchcontainer XBlock',   # TODO: write a better description.
     packages=[
