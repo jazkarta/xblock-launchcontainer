@@ -3,11 +3,11 @@ Open edX XBlock to include Appsembler's external course Container launcher
 
 # Installation
 ```
-$ pip install -e git+https://github.com/jazkarta/xblock-launchcontainer.git@master:egg=launchcontainer
+$ pip install -e git+https://github.com/jazkarta/xblock-launchcontainer.git@master#egg=launchcontainer
 ```
 or add to your requires.txt
 ```
--e git+https://github.com/jazkarta/xblock-launchcontainer.git@master:egg=launchcontainer
+-e git+https://github.com/jazkarta/xblock-launchcontainer.git@master#egg=launchcontainer
 ```
 
 Update your `lms.env.json` and `cms.env.json` to add:
