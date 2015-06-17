@@ -40,14 +40,24 @@ class LaunchContainerXBlock(XBlock):
         The primary view of the LaunchContainerXBlock, shown to students
         when viewing courses.
         """
+        user_email = None
+        if self.system.anonymous_student_id:
+            if getattr(self.system, 'get_real_user', None):
+                anon_id = self.system.anonymous_student_id
+                user = self.system.get_real_user(anon_id)
+                if user and user.is_authenticated():
+                    user_email = user.email
+        
         context = {
             'project': self.project,
+            'user_email' : user_email,
         }
         frag = Fragment()
         frag.add_content(
             render_template('static/html/launchcontainer.html', context)
         )
-        frag.add_javascript(load_resource("static/js/src/launchcontainer.js"))
+        frag.add_javascript(render_template("static/js/src/launchcontainer.js",
+                                            context))
         frag.initialize_js('LaunchContainerXBlock')
         return frag
 
@@ -80,7 +90,8 @@ class LaunchContainerXBlock(XBlock):
                     context
                 )
             )
-            fragment.add_javascript(load_resource("static/js/src/launchcontainer_edit.js"))
+            fragment.add_javascript(
+                load_resource("static/js/src/launchcontainer_edit.js"))
             fragment.initialize_js('LaunchContainerEditBlock')
 
             return fragment
@@ -98,7 +109,7 @@ class LaunchContainerXBlock(XBlock):
             }
         except Exception as e:
             return {
-                'result': 'Error saving data to Launch Container:{0}'.format(str(e))
+                'result': 'Error saving data:{0}'.format(str(e))
             }
 
 def load_resource(resource_path):  # pragma: NO COVER

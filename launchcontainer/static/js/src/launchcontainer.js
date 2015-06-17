@@ -1,10 +1,12 @@
-(function () {
+$(document).ready(
+  function () {
     var $launcher = $('#launcher1'), $launch_button = $launcher.find('input');
     $launch_button.click(function() {
+        console.log('Clicked launch button');
         $launch_button.attr('disabled', 'disabled').val('Launching...');
         $launcher.find('iframe')[0].contentWindow.postMessage({
-            owner_email: "%%USER_EMAIL%%",
-            project: "{{ self.project }}"
+            owner_email: "{{ user_email }}",
+            project: "{{ project }}"
         }, "https://isc.appsembler.com");
         return false;
     });
@@ -16,5 +18,5 @@
             $launcher.text(event.data.error_message);
         }
     }, false);
-})();
+});
 
