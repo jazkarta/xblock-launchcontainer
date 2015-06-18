@@ -23,16 +23,20 @@ class LaunchContainerXBlock(XBlock):
     Container via a call to Appsembler's container deploy API.
     """
 
-    # Fields are defined on the class.  You can access them in your code as
-    # self.<fieldname>.
-
-    # TO-DO: delete count, and define your own fields.
     project = String(
         display_name='Project name',
         default=u'(EDIT THIS COMPONENT TO SET PROJECT NAME)', 
         scope=Scope.content,
         help=(u"The name of the container's Project as defined for the "
              "Appsembler API"),
+    )
+
+    project_friendly = String(
+        display_name='Project Friendly name',
+        default=u'', 
+        scope=Scope.content,
+        help=(u"The name of the container's Project as displayed to the end "
+             "user"),
     )
 
     def student_view(self, context=None):
@@ -50,6 +54,7 @@ class LaunchContainerXBlock(XBlock):
         
         context = {
             'project': self.project,
+            'project_friendly': self.project_friendly,
             'user_email' : user_email,
         }
         frag = Fragment()
@@ -77,7 +82,8 @@ class LaunchContainerXBlock(XBlock):
             edit_fields = (
                (field, none_to_empty(getattr(self, field.name)), validator)
                for field, validator in (
-                   (cls.project, 'string'), )
+                   (cls.project, 'string'), 
+                   (cls.project_friendly, 'string'), )
             )
 
             context = {
@@ -104,6 +110,8 @@ class LaunchContainerXBlock(XBlock):
         log.info(u'Received data: {}'.format(data))
         try:
             self.project = data['project']
+            self.project_friendly = data['project_friendly']
+
             return {
                 'result': 'success',
             }

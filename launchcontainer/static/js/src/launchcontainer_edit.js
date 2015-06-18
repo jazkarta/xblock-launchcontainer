@@ -4,6 +4,7 @@ function LaunchContainerEditBlock(runtime, element) {
         var handlerUrl = runtime.handlerUrl(element, 'studio_submit');
         var data = {
             'project': $('input[name=project]').val(),
+            'project_friendly': $('input[name=project_friendly]').val(),
         };
         runtime.notify('save', {state: 'start'});
         $.post(handlerUrl, JSON.stringify(data)).done(function(response) {
