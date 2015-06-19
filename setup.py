@@ -23,7 +23,9 @@ def package_data(pkg, roots):
 setup(
     name='xblock-launchcontainer',
     version='0.1',
-    description='launchcontainer XBlock',   # TODO: write a better description.
+    description=('Open EdX XBlock to display a button allowing an LMS user '
+                 'to launch and link to an external courseware resource via the '
+                 'Appsembler Intersystems  API',
     packages=[
         'launchcontainer',
     ],
