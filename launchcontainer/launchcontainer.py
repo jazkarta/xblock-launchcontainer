@@ -23,6 +23,10 @@ class LaunchContainerXBlock(XBlock):
     Container via a call to Appsembler's container deploy API.
     """
 
+    display_name = String(help="Display name of the component", 
+                          default="Container Launcher",
+                          scope=Scope.settings)
+
     project = String(
         display_name='Project name',
         default=u'(EDIT THIS COMPONENT TO SET PROJECT NAME)', 
