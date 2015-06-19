@@ -6,10 +6,6 @@ import mock
 import os
 import unittest
 
-from courseware.models import StudentModule
-from django.contrib.auth.models import User
-from student.models import anonymous_id_for_user, UserProfile
-from submissions.models import StudentItem
 from xblock.field_data import DictFieldData
 from opaque_keys.edx.locations import Location, SlashSeparatedCourseKey
 
@@ -62,62 +58,6 @@ class LaunchContainerXBlockTests(unittest.TestCase):
         block.project_friendly = 'Foo Project Friendly Name'
         return block
 
-    def make_student(self, block, name, make_state=True, **state):
-        """
-        Create a student along with submission state.
-        """
-        answer = {}
-        module = None
-        for key in ('sha1', 'mimetype', 'filename'):
-            if key in state:
-                answer[key] = state.pop(key)
-
-        user = User(username=name)
-        user.save()
-        profile = UserProfile(user=user, name=name)
-        profile.save()
-        if make_state:
-            module = StudentModule(
-                module_state_key=block.location,
-                student=user,
-                course_id=self.course_id,
-                state=json.dumps(state))
-            module.save()
-
-        anonymous_id = anonymous_id_for_user(user, self.course_id)
-        item = StudentItem(
-            student_id=anonymous_id,
-            course_id=self.course_id,
-            item_id=block.scope_ids.usage_id,
-            item_type='launchcontainer')
-        item.save()
-
-        self.addCleanup(item.delete)
-        self.addCleanup(profile.delete)
-        self.addCleanup(user.delete)
-
-        if make_state:
-            self.addCleanup(module.delete)
-            return {
-                'module': module,
-                'item': item,
-            }
-
-        return {
-            'item': item,
-        }
-
-    def personalize(self, block, module, item):
-        # pylint: disable=unused-argument
-        """
-        Set values on block from student state.
-        """
-        student_module = StudentModule.objects.get(pk=module.id)
-        state = json.loads(student_module.state)
-        for key, value in state.items():
-            setattr(block, key, value)
-        self.runtime.anonymous_student_id = item.student_id
-
     @mock.patch('launchcontainer.launchcontainer.load_resource', DummyResource)
     @mock.patch('launchcontainer.launchcontainer.render_template')
     @mock.patch('launchcontainer.launchcontainer.Fragment')
@@ -127,7 +67,6 @@ class LaunchContainerXBlockTests(unittest.TestCase):
         Test student view renders correctly.
         """
         block = self.make_one("Custom name")
-        self.personalize(block, **self.make_student(block, 'nate'))
         fragment = block.student_view()
         render_template.assert_called_once()
         template_arg = render_template.call_args_list[0][0][0]
