@@ -49,12 +49,14 @@ class LaunchContainerXBlock(XBlock):
         when viewing courses.
         """
         user_email = None
-        if self.system.anonymous_student_id:
-            if getattr(self.system, 'get_real_user', None):
-                anon_id = self.system.anonymous_student_id
-                user = self.system.get_real_user(anon_id)
-                if user and user.is_authenticated():
-                    user_email = user.email
+        # workbench runtime won't supply system property
+        if getattr(self, 'system', None):
+            if self.system.anonymous_student_id:
+                if getattr(self.system, 'get_real_user', None):
+                    anon_id = self.system.anonymous_student_id
+                    user = self.system.get_real_user(anon_id)
+                    if user and user.is_authenticated():
+                        user_email = user.email
         
         context = {
             'project': self.project,
@@ -123,6 +125,18 @@ class LaunchContainerXBlock(XBlock):
             return {
                 'result': 'Error saving data:{0}'.format(str(e))
             }
+
+    @staticmethod
+    def workbench_scenarios():
+        """A canned scenario for display in the workbench."""
+        return [
+            ("A single launchcontainer",
+             """\
+                <vertical_demo>
+                    <launchcontainer/>
+                </vertical_demo>
+             """)
+        ]
 
 def load_resource(resource_path):  # pragma: NO COVER
      """
