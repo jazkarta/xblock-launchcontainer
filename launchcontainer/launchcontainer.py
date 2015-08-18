@@ -7,13 +7,31 @@ import pkg_resources
 import logging
 
 from django.template import Context, Template
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
 
 from xblock.core import XBlock
 from xblock.fields import Scope, String
 from xblock.fragment import Fragment
 
-
 log = logging.getLogger(__name__)
+
+
+class URLField(String):
+    """ XBlock String field with URL validation
+    """   
+
+    def enforce_type(self, value):
+        """ enforce a valid URI
+        """
+        # will raise a ValidationError if not a URI
+        if value is None:
+            return value
+        try:
+            valid = URLValidator()(value)
+        except ValidationError:
+            raise ValidationError('Please enter a valid URL for Redirection URL.')
+        return self.from_json(value)
 
 
 class LaunchContainerXBlock(XBlock):
@@ -43,6 +61,14 @@ class LaunchContainerXBlock(XBlock):
              "user"),
     )
 
+    redir_url = URLField(
+        display_name='Redirection URL',
+        scope=Scope.content,
+        help=(u"The URL to which the student will be redirected when the "
+              "container has launched."),
+        enforce_type=True,
+    )
+
     def student_view(self, context=None):
         """
         The primary view of the LaunchContainerXBlock, shown to students
@@ -62,6 +88,7 @@ class LaunchContainerXBlock(XBlock):
             'project': self.project,
             'project_friendly': self.project_friendly,
             'user_email' : user_email,
+            'redir_url' :self.redir_url
         }
         frag = Fragment()
         frag.add_content(
@@ -89,7 +116,8 @@ class LaunchContainerXBlock(XBlock):
                (field, none_to_empty(getattr(self, field.name)), validator)
                for field, validator in (
                    (cls.project, 'string'), 
-                   (cls.project_friendly, 'string'), )
+                   (cls.project_friendly, 'string'), 
+                   (cls.redir_url, 'string'), )
             )
 
             context = {
@@ -117,6 +145,7 @@ class LaunchContainerXBlock(XBlock):
         try:
             self.project = data['project']
             self.project_friendly = data['project_friendly']
+            self.redir_url = data['redir_url']
 
             return {
                 'result': 'success',

@@ -5,6 +5,7 @@ function LaunchContainerEditBlock(runtime, element) {
         var data = {
             'project': $('input[name=project]').val(),
             'project_friendly': $('input[name=project_friendly]').val(),
+            'redir_url': $('input[name=redir_url]').val(),
         };
         runtime.notify('save', {state: 'start'});
         $.post(handlerUrl, JSON.stringify(data)).done(function(response) {
@@ -12,8 +13,8 @@ function LaunchContainerEditBlock(runtime, element) {
                 runtime.notify('save', {state: 'end'});
             }
             else {
-                runtime.notify('save', {state: 'end'});
-                $('#error-message', element).html('Error: '+response.result);
+                runtime.notify('error', {msg: response.result});
+                //$('#error-message', element).html('Error: '+response.result);
             }
         });
     });
