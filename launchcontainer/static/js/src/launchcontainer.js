@@ -6,7 +6,8 @@ $(document).ready(
         $launch_button.attr('disabled', 'disabled').val('Launching...');
         $launcher.find('iframe')[0].contentWindow.postMessage({
             owner_email: "{{ user_email }}",
-            project: "{{ project }}"
+            project: "{{ project }}",
+            redir_url: "{{ redir_url }}"
         }, "https://isc.appsembler.com");
         return false;
     });
