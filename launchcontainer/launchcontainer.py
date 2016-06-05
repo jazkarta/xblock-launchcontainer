@@ -1,3 +1,4 @@
+
 """This XBlock provides an HTML page fragment to display a button
    allowing the Course user to launch an external course Container
    via Appsembler's Container deploy API.
@@ -6,6 +7,7 @@
 import pkg_resources
 import logging
 
+from django.conf import settings
 from django.template import Context, Template
 
 from xblock.core import XBlock
@@ -14,6 +16,9 @@ from xblock.fragment import Fragment
 
 
 log = logging.getLogger(__name__)
+
+
+API_URL_DEFAULT = 'http://isc.appsembler.com'  # BBB
 
 
 class LaunchContainerXBlock(XBlock):
@@ -43,6 +48,25 @@ class LaunchContainerXBlock(XBlock):
              "user"),
     )
 
+    api_url = String(
+        default=u'',
+        scope=Scope.content,
+    )
+
+    @property
+    def block_course_org(self):
+        return self.runtime.course_id.org
+    
+    def _get_API_url(self):
+        api_conf = settings.ENV_TOKENS.get('LAUNCHCONTAINER_API_CONF', None)
+        if not api_conf:
+            return API_URL_DEFAULT  # BBB
+        else:
+            try:
+                return api_conf[self.block_course_org]
+            except KeyError:
+                return api_conf['default']
+
     def student_view(self, context=None):
         """
         The primary view of the LaunchContainerXBlock, shown to students
@@ -62,6 +86,7 @@ class LaunchContainerXBlock(XBlock):
             'project': self.project,
             'project_friendly': self.project_friendly,
             'user_email' : user_email,
+            'API_url': self.api_url
         }
         frag = Fragment()
         frag.add_content(
@@ -117,6 +142,7 @@ class LaunchContainerXBlock(XBlock):
         try:
             self.project = data['project']
             self.project_friendly = data['project_friendly']
+            self.api_url = self._get_API_url()
 
             return {
                 'result': 'success',
