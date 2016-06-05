@@ -18,7 +18,7 @@ from xblock.fragment import Fragment
 log = logging.getLogger(__name__)
 
 
-API_URL_DEFAULT = 'http://isc.appsembler.com'  # BBB
+API_URL_DEFAULT = 'http://isc.appsembler.com/isc/newdeploy'  # BBB
 
 
 class LaunchContainerXBlock(XBlock):
@@ -57,6 +57,14 @@ class LaunchContainerXBlock(XBlock):
     def block_course_org(self):
         return self.runtime.course_id.org
     
+    @property
+    def student_email(self):
+        if hasattr(self, "runtime"):
+            user = self.runtime._services['user'].get_current_user()
+            return user.emails[0]
+        else:
+            return None
+
     def _get_API_url(self):
         api_conf = settings.ENV_TOKENS.get('LAUNCHCONTAINER_API_CONF', None)
         if not api_conf:
@@ -72,20 +80,11 @@ class LaunchContainerXBlock(XBlock):
         The primary view of the LaunchContainerXBlock, shown to students
         when viewing courses.
         """
-        user_email = None
-        # workbench runtime won't supply system property
-        if getattr(self, 'system', None):
-            if self.system.anonymous_student_id:
-                if getattr(self.system, 'get_real_user', None):
-                    anon_id = self.system.anonymous_student_id
-                    user = self.system.get_real_user(anon_id)
-                    if user and user.is_authenticated():
-                        user_email = user.email
         
         context = {
             'project': self.project,
             'project_friendly': self.project_friendly,
-            'user_email' : user_email,
+            'user_email' : self.student_email,
             'API_url': self.api_url
         }
         frag = Fragment()
