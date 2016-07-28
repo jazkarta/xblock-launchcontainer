@@ -57,7 +57,11 @@ class LaunchContainerXBlock(XBlock):
                     user = self.system.get_real_user(anon_id)
                     if user and user.is_authenticated():
                         user_email = user.email
-        
+                elif self.system.user_is_staff:  # Studio preview
+                    from django.contrib.auth.models import User
+                    user = User.objects.get(id=self.system.user_id)
+                    user_email = user.email
+
         context = {
             'project': self.project,
             'project_friendly': self.project_friendly,
