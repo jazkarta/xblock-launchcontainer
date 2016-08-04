@@ -22,8 +22,8 @@ def package_data(pkg, roots):
 
 setup(
     name='xblock-launchcontainer',
-    version='0.2',
-    author='Bryan Wilson, Appsembler',
+    version='1.1',
+    author='Bryan Wilson, Jazkarta',
     description=('Open EdX XBlock to display a button allowing an LMS user '
                  'to launch and link to an external courseware resource via the '
                  'Wharf container API'),

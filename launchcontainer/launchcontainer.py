@@ -80,11 +80,25 @@ class LaunchContainerXBlock(XBlock):
         The primary view of the LaunchContainerXBlock, shown to students
         when viewing courses.
         """
-        
+
+        user_email = None
+        # workbench runtime won't supply system property
+        if getattr(self, 'system', None):
+            if self.system.anonymous_student_id:
+                if getattr(self.system, 'get_real_user', None):
+                    anon_id = self.system.anonymous_student_id
+                    user = self.system.get_real_user(anon_id)
+                    if user and user.is_authenticated():
+                        user_email = user.email
+                elif self.system.user_is_staff:  # Studio preview
+                    from django.contrib.auth.models import User
+                    user = User.objects.get(id=self.system.user_id)
+                    user_email = user.email
+
         context = {
             'project': self.project,
             'project_friendly': self.project_friendly,
-            'user_email' : self.student_email,
+            'user_email' : user_email,
             'API_url': self.api_url
         }
         frag = Fragment()
