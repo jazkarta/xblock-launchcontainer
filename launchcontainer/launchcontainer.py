@@ -18,7 +18,10 @@ from xblock.fragment import Fragment
 log = logging.getLogger(__name__)
 
 
-API_URL_DEFAULT = 'http://isc.appsembler.com/isc/newdeploy'  # BBB
+try:
+    API_URL_DEFAULT = settings.ENV_TOKENS.get('LAUNCHCONTAINER_API_CONF', None)['default'],
+except TypeError:
+    API_URL_DEFAULT = 'http://isc.appsembler.com/isc/newdeploy'  # BBB
 
 
 class LaunchContainerXBlock(XBlock):
@@ -49,7 +52,7 @@ class LaunchContainerXBlock(XBlock):
     )
 
     api_url = String(
-        default=u'',
+        default=API_URL_DEFAULT,
         scope=Scope.content,
     )
 
@@ -67,13 +70,10 @@ class LaunchContainerXBlock(XBlock):
 
     def _get_API_url(self):
         api_conf = settings.ENV_TOKENS.get('LAUNCHCONTAINER_API_CONF', None)
-        if not api_conf:
-            return API_URL_DEFAULT  # BBB
-        else:
-            try:
-                return api_conf[self.block_course_org]
-            except KeyError:
-                return api_conf['default']
+        try:
+            return api_conf[self.block_course_org]
+        except (TypeError, KeyError):
+            return API_URL_DEFAULT
 
     def student_view(self, context=None):
         """
