@@ -19,7 +19,7 @@ log = logging.getLogger(__name__)
 
 
 try:
-    API_URL_DEFAULT = settings.ENV_TOKENS.get('LAUNCHCONTAINER_API_CONF', None)['default'],
+    API_URL_DEFAULT = settings.ENV_TOKENS.get('LAUNCHCONTAINER_API_CONF', None)['default']
 except TypeError:
     API_URL_DEFAULT = 'http://isc.appsembler.com/isc/newdeploy'  # BBB
 
