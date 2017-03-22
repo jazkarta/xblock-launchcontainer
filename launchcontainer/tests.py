@@ -3,11 +3,27 @@ Tests for launchcontainer
 """
 import json
 import mock
-import os
 import unittest
 
 from xblock.field_data import DictFieldData
 from opaque_keys.edx.locations import Location, SlashSeparatedCourseKey
+
+from django.test.utils import override_settings
+
+from .launchcontainer import API_URL_DEFAULT
+
+
+API_URL_CONF_SET_WITH_GOOD_ORG = {
+    "org": "https://api.org.com"
+}
+
+
+API_URL_CONF_SET_WITH_BAD_ORG = {
+    "other_org": "https://api.foo.com",
+    "default": "https://api.default.com"
+}
+
+API_URL_CONF_NOT_SET = {}
 
 
 class DummyResource(object):
@@ -123,3 +139,31 @@ class LaunchContainerXBlockTests(unittest.TestCase):
             "project": proj_str,
             "project_friendly": proj_friendly_str})))
         self.assertEqual(block.display_name, "Container Launcher")
+
+    @override_settings("ENV_TOKENS['LAUNCHCONTAINER_API_CONF']", API_URL_CONF_SET_WITH_GOOD_ORG)
+    def test_api_url_set_defined_with_org(self):
+        """ 
+        Test expected case with ENV TOKEN for API_URL_CONF
+        """
+        block = self.make_one()
+        block.studio_submit(mock.Mock(body='{}'))
+        self.assertEqual(block.api_url, 'https://api.org.com')
+
+    @override_settings("ENV_TOKENS['LAUNCHCONTAINER_API_CONF']", API_URL_CONF_SET_WITH_BAD_ORG)
+    def test_api_url_default_fallback(self):
+        """ 
+        Test expected case with ENV TOKEN for API_URL_CONF
+        """
+        block = self.make_one()
+        block.studio_submit(mock.Mock(body='{}'))
+        self.assertEqual(block.api_url, 'https://api.default.com')
+
+    @override_settings("ENV_TOKENS['LAUNCHCONTAINER_API_CONF']", API_URL_CONF_NOT_SET)
+    def test_api_url_not_set(self):
+        """ 
+        Test expected case with ENV TOKEN for API_URL_CONF
+        """
+        block = self.make_one()
+        block.studio_submit(mock.Mock(body='{}'))
+        self.assertEqual(block.api_url, API_URL_DEFAULT)
+

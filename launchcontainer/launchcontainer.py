@@ -1,3 +1,4 @@
+
 """This XBlock provides an HTML page fragment to display a button
    allowing the Course user to launch an external course Container
    via Appsembler's Container deploy API.
@@ -6,6 +7,7 @@
 import pkg_resources
 import logging
 
+from django.conf import settings
 from django.template import Context, Template
 
 from xblock.core import XBlock
@@ -14,6 +16,12 @@ from xblock.fragment import Fragment
 
 
 log = logging.getLogger(__name__)
+
+
+try:
+    API_URL_DEFAULT = settings.ENV_TOKENS.get('LAUNCHCONTAINER_API_CONF', None)['default']
+except TypeError:
+    API_URL_DEFAULT = 'http://isc.appsembler.com/isc/newdeploy'  # BBB
 
 
 class LaunchContainerXBlock(XBlock):
@@ -43,11 +51,36 @@ class LaunchContainerXBlock(XBlock):
              "user"),
     )
 
+    api_url = String(
+        default=API_URL_DEFAULT,
+        scope=Scope.content,
+    )
+
+    @property
+    def block_course_org(self):
+        return self.runtime.course_id.org
+    
+    @property
+    def student_email(self):
+        if hasattr(self, "runtime"):
+            user = self.runtime._services['user'].get_current_user()
+            return user.emails[0]
+        else:
+            return None
+
+    def _get_API_url(self):
+        api_conf = settings.ENV_TOKENS.get('LAUNCHCONTAINER_API_CONF', None)
+        try:
+            return api_conf[self.block_course_org]
+        except (TypeError, KeyError):
+            return API_URL_DEFAULT
+
     def student_view(self, context=None):
         """
         The primary view of the LaunchContainerXBlock, shown to students
         when viewing courses.
         """
+
         user_email = None
         # workbench runtime won't supply system property
         if getattr(self, 'system', None):
@@ -66,6 +99,7 @@ class LaunchContainerXBlock(XBlock):
             'project': self.project,
             'project_friendly': self.project_friendly,
             'user_email' : user_email,
+            'API_url': self.api_url
         }
         frag = Fragment()
         frag.add_content(
@@ -121,6 +155,7 @@ class LaunchContainerXBlock(XBlock):
         try:
             self.project = data['project']
             self.project_friendly = data['project_friendly']
+            self.api_url = self._get_API_url()
 
             return {
                 'result': 'success',
